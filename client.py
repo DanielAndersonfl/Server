@@ -65,6 +65,9 @@ class Send(threading.Thread):
         while True:
             message = input('{}: '.format(self.name))
 
+            if message == "":
+                continue
+
             if message[0] == commandPrefix:
                 message = message.strip(commandPrefix).split(" ")
                 command = message[0]
