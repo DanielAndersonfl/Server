@@ -102,27 +102,6 @@ class Receive(threading.Thread):
                 self.sock.close()
                 os._exit(0)
 
-class Receive(threading.Thread):
-
-    def __init__(self, sock, name):
-        super().__init__()
-        self.sock = sock
-        self.name = name
-
-    def run(self):
-
-        while True:
-            message = self.sock.recv(1024)
-            if message:
-                print('\r{}\n{}: '.format(message.decode('ascii'), self.name), end='')
-            else:
-                # Server has closed the socket, exit the program
-                print('\nOh no, we have lost connection to the server!')
-                print('\nQuitting...')
-                self.sock.close()
-                os._exit(0)
-
-
 class Client:
 
     def __init__(self, host, port):
