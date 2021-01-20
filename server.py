@@ -6,7 +6,7 @@ from datetime import datetime
 
 now = datetime.now()
 current_time = now.strftime("%H:%M:%S")
-
+time_stamp_formatting = '{}: '.format(current_time)
 
 class Server(threading.Thread):
 
@@ -23,12 +23,12 @@ class Server(threading.Thread):
         sock.bind(('', self.port))
 
         sock.listen(1)
-        print('{}: Listening at'.format(current_time), sock.getsockname())
+        print('{}Listening at'.format(time_stamp_formatting), sock.getsockname())
 
         while True:
             # Accept new connection
             sc, sockname = sock.accept()
-            print('{}: Accepted a new connection from {} to {}'.format(current_time, sc.getpeername(), sc.getsockname()))
+            print('{}Accepted a new connection from {} to {}'.format(time_stamp_formatting, sc.getpeername(), sc.getsockname()))
 
             # Create new thread
             server_socket = ServerSocket(sc, sockname, self)
@@ -38,15 +38,14 @@ class Server(threading.Thread):
 
             # Add thread to active connections
             self.connections.append(server_socket)
-            print('{}: Ready to receive messages from'.format(current_time), sc.getpeername())
+            print('{}Ready to receive messages from'.format(time_stamp_formatting), sc.getpeername())
 
     def broadcast(self, message, source):
 
         for connection in self.connections:
 
             # Send to all connected clients except the source client
-            if connection.sockname != source:
-                connection.send(message)
+                connection.send('{}{}'.format(time_stamp_formatting,message))
 
 
 class ServerSocket(threading.Thread):
@@ -62,11 +61,11 @@ class ServerSocket(threading.Thread):
         while True:
             message = self.sc.recv(1024).decode('ascii')
             if message:
-                print('{}: {} says {!r}'.format(current_time, self.sockname, message))
+                print('{}{} says {!r}'.format(time_stamp_formatting, self.sockname, message))
                 self.server.broadcast(message, self.sockname)
             else:
                 # Client has closed the socket, exit the thread
-                print('{}: {} has closed the connection'.format(current_time, self.sockname))
+                print('{}{} has closed the connection'.format(time_stamp_formatting, self.sockname))
                 self.sc.close()
                 server.remove_connection(self)
                 return
@@ -78,11 +77,11 @@ class ServerSocket(threading.Thread):
 
         while True:
             ipt = input('')
-            if ipt == 'QUIT':
-                print('{}: Closing all connections...'.format(current_time))
+            if ipt == 'q':
+                print('{}Closing all connections...'.format(time_stamp_formatting))
                 for connection in server.connections:
                     connection.sc.close()
-                print('{}: Shutting down the server...'.format(current_time))
+                print('{}Shutting down the server...'.format(time_stamp_formatting))
                 os._exit(0)
 
     if __name__ == '__main__':
