@@ -44,7 +44,7 @@ class Server(threading.Thread):
 
         for connection in self.connections:
 
-            # Send to all connected clients except the source client
+            # Send to all connected clients
                 connection.send('{}{}'.format(time_stamp_formatting,message))
 
 
