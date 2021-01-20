@@ -15,6 +15,42 @@ def milliTime():
 def timeElapsed(start):
     return milliTime() - start
 
+def cmd_quit(args):
+    cmd_disconnect(args)
+    print("Closing application...")
+    os._exit(0)
+
+def cmd_help(args):
+    print("help")
+
+
+def cmd_disconnect(args):
+    client.sock.close()
+    clearWindow()
+    print('\nDisconnected.')
+
+
+
+commandPrefix = "/"
+helpCommand = "help"
+quitCommand = "quit"
+
+commandList = {
+    quitCommand: cmd_quit,
+    helpCommand: cmd_help
+    #"disconnect": cmd_disconnect Currently erroring
+
+}
+
+def invalidCommand():
+    print("Unknown command, type {}{} for information.".format(commandPrefix, helpCommand))
+
+def executeCommand(command, args):
+    if command in commandList:
+        commandList[command](args)
+    else:
+        invalidCommand()
+
 
 
 class Send(threading.Thread):
@@ -29,18 +65,21 @@ class Send(threading.Thread):
         while True:
             message = input('{}: '.format(self.name))
 
+            if message[0] == commandPrefix:
+                message = message.strip(commandPrefix).split(" ")
+                command = message[0]
+                message.remove(command)
+                args = message
+                executeCommand(command, args)
+            else:
+                # Send message to server for broadcasting
+                self.sock.sendall('{}: {}'.format(self.name, message).encode('ascii'))
+
             # Type 'QUIT' to leave the chatroom
-            if message == 'q':
+            if message == quitCommand:
                 self.sock.sendall('Server: {} has left the chat.'.format(self.name).encode('ascii'))
                 break
 
-            # Send message to server for broadcasting
-            else:
-                self.sock.sendall('{}: {}'.format(self.name, message).encode('ascii'))
-
-        print('\nQuitting...')
-        self.sock.close()
-        os._exit(0)
 
 
 class Receive(threading.Thread):
@@ -111,7 +150,7 @@ class Client:
         receive.start()
 
         self.sock.sendall('Server: {} has joined the chat. Say hi!'.format(name).encode('ascii'))
-        print("\rAll set! Leave the chatroom anytime by typing 'QUIT'\n")
+        print("\rAll set! Leave the chatroom anytime by typing {}{}\n".format(commandPrefix, quitCommand))
         print('{}: '.format(name), end = '')
 
 if __name__ == '__main__':
