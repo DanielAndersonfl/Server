@@ -2,9 +2,19 @@ import threading
 import socket
 import argparse
 import os
+import time
+
 
 def clearWindow():
     os.system('cls' if os.name == 'nt' else 'clear')
+
+def milliTime():
+    return round(time.time() * 1000)
+
+# Determines the time elapsed from start to current time
+def timeElapsed(start):
+    return milliTime() - start
+
 
 
 class Send(threading.Thread):
@@ -85,8 +95,9 @@ class Client:
         name = input('Your name: ')
         clearWindow()
         print('Trying to connect to {}:{}...'.format(self.host, self.port))
+        startTime = milliTime()
         self.sock.connect((self.host, self.port))
-        print('Successfully connected to {}:{}'.format(self.host, self.port))
+        print('Successfully connected to {}:{}. Took {}ms'.format(self.host, self.port, timeElapsed(startTime)))
 
         print()
         print('Welcome, {}! Getting ready to send and receive messages...'.format(name))
