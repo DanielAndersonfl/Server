@@ -2,6 +2,11 @@ import threading
 import socket
 import argparse
 import os
+from datetime import datetime
+
+now = datetime.now()
+current_time = now.strftime("%H:%M:%S")
+
 
 class Server(threading.Thread):
 
@@ -18,12 +23,12 @@ class Server(threading.Thread):
         sock.bind(('', self.port))
 
         sock.listen(1)
-        print('Listening at', sock.getsockname())
+        print('{}: Listening at'.format(current_time), sock.getsockname())
 
         while True:
             # Accept new connection
             sc, sockname = sock.accept()
-            print('Accepted a new connection from {} to {}'.format(sc.getpeername(), sc.getsockname()))
+            print('{}: Accepted a new connection from {} to {}'.format(current_time, sc.getpeername(), sc.getsockname()))
 
             # Create new thread
             server_socket = ServerSocket(sc, sockname, self)
@@ -33,7 +38,7 @@ class Server(threading.Thread):
 
             # Add thread to active connections
             self.connections.append(server_socket)
-            print('Ready to receive messages from', sc.getpeername())
+            print('{}: Ready to receive messages from'.format(current_time), sc.getpeername())
 
     def broadcast(self, message, source):
 
@@ -57,13 +62,13 @@ class ServerSocket(threading.Thread):
         while True:
             message = self.sc.recv(1024).decode('ascii')
             if message:
-                print('{} says {!r}'.format(self.sockname, message))
+                print('{}: {} says {!r}'.format(current_time, self.sockname, message))
                 self.server.broadcast(message, self.sockname)
             else:
                 # Client has closed the socket, exit the thread
-                print('{} has closed the connection'.format(self.sockname))
+                print('{}: {} has closed the connection'.format(current_time, self.sockname))
                 self.sc.close()
-                Server.remove_connection(self)
+                server.remove_connection(self)
                 return
 
     def send(self, message):
@@ -73,11 +78,11 @@ class ServerSocket(threading.Thread):
 
         while True:
             ipt = input('')
-            if ipt == 'q':
-                print('Closing all connections...')
+            if ipt == 'QUIT':
+                print('{}: Closing all connections...'.format(current_time))
                 for connection in server.connections:
                     connection.sc.close()
-                print('Shutting down the server...')
+                print('{}: Shutting down the server...'.format(current_time))
                 os._exit(0)
 
     if __name__ == '__main__':
