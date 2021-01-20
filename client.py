@@ -3,6 +3,9 @@ import socket
 import argparse
 import os
 
+def clearWindow():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
 
 class Send(threading.Thread):
 
@@ -79,12 +82,11 @@ class Client:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def start(self):
+        name = input('Your name: ')
+        clearWindow()
         print('Trying to connect to {}:{}...'.format(self.host, self.port))
         self.sock.connect((self.host, self.port))
         print('Successfully connected to {}:{}'.format(self.host, self.port))
-
-        print()
-        name = input('Your name: ')
 
         print()
         print('Welcome, {}! Getting ready to send and receive messages...'.format(name))
@@ -102,6 +104,7 @@ class Client:
         print('{}: '.format(name), end = '')
 
 if __name__ == '__main__':
+    clearWindow()
     parser = argparse.ArgumentParser(description='Chatroom Server')
     parser.add_argument('host', help='Interface the server listens at')
     parser.add_argument('-p', metavar='PORT', type=int, default=1060,
@@ -110,5 +113,6 @@ if __name__ == '__main__':
 
     client = Client(args.host, args.p)
     client.start()
+    #test
 
 
