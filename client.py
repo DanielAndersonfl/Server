@@ -1,9 +1,35 @@
+# Version 1.00
 import threading
 import socket
-import argparse
+#import argparse
 import os
 import time
 
+bookmarksFile = "bookmarks.txt"
+
+def createFiles():
+    f = open(bookmarksFile, "a")
+
+def bookmarkExist(newBookmark):
+    with open(bookmarksFile, "r") as bookmark:
+        bookmarks = bookmark.read()
+        if newBookmark in bookmarks:
+            return True
+        else:
+            return False
+
+
+
+def createBookmark(host, port):
+    newBookmark = "{}:{}".format(host, port)
+    if not bookmarkExist(newBookmark):
+        with open(bookmarksFile, "a") as bookmark:
+            name = input("Enter name for bookmark:")
+            newBookmark = "{}: {}".format(name, newBookmark)
+            bookmark.write(newBookmark)
+            print("{} added to bookmarks!".format(newBookmark))
+    else:
+        print("Bookmark already exists!")
 
 def clearWindow():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -23,6 +49,8 @@ def cmd_quit(args):
 def cmd_help(args):
     print("help")
 
+def cmd_bookmark(args):
+    createBookmark(client.host, client.port)
 
 def cmd_disconnect(args):
     client.sock.close()
@@ -37,7 +65,8 @@ quitCommand = "quit"
 
 commandList = {
     quitCommand: cmd_quit,
-    helpCommand: cmd_help
+    helpCommand: cmd_help,
+    "bookmark": cmd_bookmark
     #"disconnect": cmd_disconnect Currently erroring
 
 }
@@ -136,6 +165,7 @@ class Client:
         print('{}: '.format(name), end = '')
 
 if __name__ == '__main__':
+    createFiles()
     clearWindow()
     #parser = argparse.ArgumentParser(description='Chatroom Server')
     #parser.add_argument('host', help='Interface the server listens at')
