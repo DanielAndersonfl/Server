@@ -2,11 +2,14 @@ import threading
 import socket
 import argparse
 import os
+import client
 from datetime import datetime
 
 now = datetime.now()
 current_time = now.strftime("%H:%M:%S")
-time_stamp_formatting = '{}: '.format(current_time)
+time_stamp_formatting = '{}| '.format(current_time)
+
+SERVER_VERSION = '1.0.0'
 
 class Server(threading.Thread):
 
@@ -40,7 +43,7 @@ class Server(threading.Thread):
             self.connections.append(server_socket)
             print('{}Ready to receive messages from'.format(time_stamp_formatting), sc.getpeername())
 
-    def broadcast(self, message, source):
+    def broadcast(self, message):
 
         for connection in self.connections:
 
@@ -62,7 +65,7 @@ class ServerSocket(threading.Thread):
             message = self.sc.recv(1024).decode('ascii')
             if message:
                 print('{}{} says {!r}'.format(time_stamp_formatting, self.sockname, message))
-                self.server.broadcast(message, self.sockname)
+                self.server.broadcast(message)
             else:
                 # Client has closed the socket, exit the thread
                 print('{}{} has closed the connection'.format(time_stamp_formatting, self.sockname))
@@ -83,6 +86,12 @@ class ServerSocket(threading.Thread):
                     connection.sc.close()
                 print('{}Shutting down the server...'.format(time_stamp_formatting))
                 os._exit(0)
+            else:
+                message = 'Server: {}'.format(ipt)
+                Server.broadcast(server, message)
+                print('{}{}'.format(time_stamp_formatting, message))
+
+
 
     if __name__ == '__main__':
         parser = argparse.ArgumentParser(description='Chatroom Server')
