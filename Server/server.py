@@ -2,7 +2,6 @@ import threading
 import socket
 import argparse
 import os
-import client
 from datetime import datetime
 
 now = datetime.now()
